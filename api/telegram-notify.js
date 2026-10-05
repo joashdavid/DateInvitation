@@ -36,8 +36,13 @@ module.exports = async function handler(req, res) {
     const result = await telegramResponse.json();
 
     if (!telegramResponse.ok || !result.ok) {
-      console.error('Telegram rejected notification:', result.description || telegramResponse.status);
-      return res.status(502).json({ ok: false, error: 'Telegram rejected the notification' });
+      const description = result.description || 'Telegram rejected the notification';
+      console.error('Telegram rejected notification:', result.error_code || telegramResponse.status, description);
+      return res.status(502).json({
+        ok: false,
+        error: description,
+        telegramErrorCode: result.error_code || telegramResponse.status
+      });
     }
 
     return res.status(200).json({ ok: true });
